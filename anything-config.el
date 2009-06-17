@@ -1719,34 +1719,31 @@ source.")
 ;; (anything 'anything-c-source-man-pages)
 
 ;;; Info pages
-(defvar anything-c-info-pages nil
-  "All info pages on system.
-Will be calculated the first time you invoke anything with this
-source.")
-
 (defvar anything-c-source-info-pages
-  `((name . "Info Pages")
-    (candidates . (lambda ()
-                    (if anything-c-info-pages
-                        anything-c-info-pages
-                      (setq anything-c-info-pages
-                            (save-window-excursion
-                              (save-excursion
-                                (require 'info)
-                                (Info-find-node "dir" "top")
-                                (goto-char (point-min))
-                                (let ((info-topic-regexp "\\* +\\([^:]+: ([^)]+)[^.]*\\)\\.")
-                                      topics)
-                                  (while (re-search-forward info-topic-regexp nil t)
-                                    (add-to-list 'topics (match-string-no-properties 1)))
-                                  (goto-char (point-min))
-                                  (Info-exit)
-                                  topics)))))))
-    (action . (("Show with Info" .(lambda (node-str)
-                                    (info (replace-regexp-in-string "^[^:]+: "
-                                                                    ""
-                                                                    node-str))))))
-    (requires-pattern . 2)))
+  '((name . "Info Pages")
+    (init . anything-c-info-pages-init)
+    (candidates-in-buffer)
+    (action . (("Show with Info" . (lambda (node-str)
+                                     (info (replace-regexp-in-string "^[^:]+: "
+                                                                     ""
+                                                                     node-str))))))))
+
+(defun anything-c-info-pages-init ()
+  "Init function for `anything-c-source-info-pages'."
+  (save-excursion
+    (require 'info)
+    (Info-find-node "dir" "top")
+    (goto-char (point-min))
+    (let ((info-topic-regexp "\\* +\\([^:]+: ([^)]+)[^.]*\\)\\.")
+          topics)
+      (while (re-search-forward info-topic-regexp nil t)
+        (add-to-list 'topics (match-string-no-properties 1)))
+      (goto-char (point-min))
+      (Info-exit)
+      (with-current-buffer (anything-candidate-buffer 'local)
+        (mapcar '(lambda (item)
+                   (insert item "\n"))
+                topics)))))
 ;; (anything 'anything-c-source-info-pages)
 
 ;; Info Elisp
