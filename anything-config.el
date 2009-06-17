@@ -1747,24 +1747,26 @@ source.")
 ;; (anything 'anything-c-source-info-pages)
 
 ;; Info Elisp
-(defvar anything-c-info-elisp nil)
 (defvar anything-c-source-info-elisp
-  `((name . "Info Elisp")
-    (init . (lambda ()
-              (save-window-excursion
-                (unless anything-c-info-elisp
-                  (with-temp-buffer
-                    (Info-find-node "elisp" "Index")
-                    (setq anything-c-info-elisp (split-string (buffer-string) "\n"))
-                    (Info-exit))))))
-    (candidates . (lambda ()
-                    (loop for i in anything-c-info-elisp
-                          if (string-match "^* [^ \n]+[^: ]" i)
-                          collect (match-string 0 i))))
-    (action . (lambda (candidate)
-                (Info-find-node "elisp" "Index")
-                (Info-index (replace-regexp-in-string "* " "" candidate))))
-    (requires-pattern . 2)))
+  '((name . "Info Elisp")
+    (init . anything-c-info-elisp-init)
+    (candidates-in-buffer)
+    (action . (("Go to Elisp Info" . (lambda (candidate)
+                                      (Info-find-node "elisp" "Index")
+                                      (Info-index (replace-regexp-in-string "* " "" candidate))))))))
+
+(defun anything-c-info-elisp-init ()
+  (let (info-elisp)
+    (save-window-excursion
+      (with-temp-buffer
+        (Info-find-node "elisp" "Index")
+        (setq info-elisp (split-string (buffer-string) "\n"))
+        (Info-exit)))
+    (with-current-buffer (anything-candidate-buffer 'local)
+      (mapcar '(lambda (item)
+                 (if (string-match "^* [^ \n]+[^: ,]" item)
+                     (insert (match-string-no-properties 0 item) "\n")))
+              info-elisp))))
 ;; (anything 'anything-c-source-info-elisp)
 
 ;; Info-Common-Lisp
