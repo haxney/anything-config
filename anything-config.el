@@ -1697,25 +1697,21 @@ It is cleared after jumping line.")
 
 ;;;; <Help>
 ;;; Man Pages
-(defvar anything-c-man-pages nil
-  "All man pages on system.
-Will be calculated the first time you invoke anything with this
-source.")
-
 (defvar anything-c-source-man-pages
-  `((name . "Manual Pages")
-    (candidates . (lambda ()
-                    (if anything-c-man-pages
-                        anything-c-man-pages
-                      ;; XEmacs doesn't have a woman :)
-                      (setq anything-c-man-pages
-                            (ignore-errors
-                              (require 'woman)
-                              (woman-file-name "")
-                              (sort (mapcar 'car woman-topic-all-completions)
-                                    'string-lessp))))))
-    (action  ("Show with Woman" . woman))
-    (requires-pattern . 2)))
+  '((name . "Manual Pages")
+    (init . (lambda () (with-current-buffer (anything-candidate-buffer 'local)
+                         (ignore-errors
+                           (require 'woman)
+                           (woman-file-name "")
+                           (mapcar '(lambda (item)
+                                      (insert (car item) "\n"))
+                                   (sort woman-topic-all-completions
+                                         '(lambda (s1 s2)
+                                            (string-lessp (car s1) (car s2)))))))))
+    (candidates-in-buffer)
+    (action  . (("Show with Woman" . woman))))
+  "Search manual pages with woman.
+Uses `candidates-in-buffer' to speed up search.")
 ;; (anything 'anything-c-source-man-pages)
 
 ;;; Info pages
