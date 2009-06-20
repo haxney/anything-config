@@ -1917,11 +1917,18 @@ word in the function's name, e.g. \"bb\" is an abbrev for
 
 (define-anything-type-attribute 'bm
   '((display-to-real . (lambda (candidate)
-                         (bm-bookmark-at
-                          (save-excursion
-                            (goto-line (car (anything-c-display-to-real-line candidate)))
-                            (line-beginning-position)))))
-    (action . (("Jump to Bookmark" . bm-goto)
+                         (save-excursion
+                           (unless (string-match "^ *\\([0-9]+\\): \\[\\(.+\\)\\]: <\\(.+\\)>.*$" candidate)
+                             (error "Bookmark specification not found."))
+                           (let ((line (string-to-number (match-string 1 candidate)))
+                                 (annotation (match-string 2 candidate))
+                                 (buffer (get-buffer (match-string 3 candidate))))
+                             (with-current-buffer buffer
+                               (goto-line line)
+                               (bm-bookmark-at (line-beginning-position)))))))
+    (action . (("Jump to Bookmark" . (lambda (bookmark)
+                                       (switch-to-buffer (overlay-buffer bookmark))
+                                       (bm-goto bookmark)))
                ("Delete Bookmark" . (lambda (bookmark)
                                       (with-current-buffer (overlay-buffer bookmark)
                                         (bm-bookmark-remove bookmark)))))))
@@ -1943,26 +1950,50 @@ http://www.nongnu.org/bm/")
 (defun anything-c-bm-init ()
   "Init function for `anything-c-source-bm'."
   (when (require 'bm nil t)
-    (with-no-warnings
-      (let ((bookmarks (bm-lists))
-            (buf (anything-candidate-buffer 'global)))
-        (dolist (bm (sort* (append (car bookmarks) (cdr bookmarks))
-                           '< :key 'overlay-start))
+    (let ((bookmarks (bm-lists)))
+    (anything-c-bm-build-buffer (append (car bookmarks) (cdr bookmarks))))))
+
+(defun anything-c-bm-build-buffer (bookmarks)
+  "Build the anything candidates buffer for bm bookmarks."
+  (with-no-warnings
+    (let ((buf (anything-candidate-buffer 'global))
+          (str))
+      (dolist (bm (sort* bookmarks
+                         '< :key 'overlay-start))
+        (with-current-buffer (overlay-buffer bm)
           (let ((start (overlay-start bm))
                 (end (overlay-end bm))
                 (annotation (or (overlay-get bm 'annotation) "")))
             (unless (< (- end start) 1) ; org => (if (< (- end start) 2)
-              (let ((str (format "%7d: [%s]: %s\n"
-                                 (line-number-at-pos start)
-                                 annotation
-                                 (buffer-substring start (1- end)))))
-                (with-current-buffer buf (insert str))))))))))
+              (setq str (format "%7d: [%-20.20s]: <%s> %s\n"
+                                (line-number-at-pos start)
+                                annotation
+                                (buffer-name)
+                                (buffer-substring start (1- end)))))))
+        (with-current-buffer buf (insert str))))))
 
 ;;; Visible Bookmarks add
 (defvar anything-c-source-bm-add
   '((name . "Add Visible Bookmark")
     (dummy)
     (action . bm-bookmark-add)))
+
+;;; Visual Bookmarks in all buffers
+;; (install-elisp "http://emacswiki.org/emacs/download/bm-ext.el")
+(defvar anything-c-source-bm-all
+  '((name . "Visible Bookmarks (Global)")
+    (init . anything-c-bm-all-init)
+    (candidates-in-buffer)
+    (type . bm))
+  "Needs bm.el and bm-ext.el.
+
+http://www.nongnu.org/bm/
+http://www.emacswiki.org/wiki/VisibleBookmarks")
+
+(defun anything-c-bm-all-init ()
+  "Init function for `anything-c-source-bm-all'."
+  (when (require 'bm-ext nil t)
+    (anything-c-bm-build-buffer (bm-all-bookmarks))))
 
 ;;; Special bookmarks
 (defvar anything-c-source-bookmarks-ssh
