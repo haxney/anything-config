@@ -1915,16 +1915,27 @@ word in the function's name, e.g. \"bb\" is an abbrev for
   "See (info \"(emacs)Bookmarks\").")
 ;; (anything 'anything-c-source-bookmark-set)
 
+(define-anything-type-attribute 'bm
+  '((display-to-real . (lambda (candidate)
+                         (bm-bookmark-at
+                          (save-excursion
+                            (goto-line (car (anything-c-display-to-real-line candidate)))
+                            (line-beginning-position)))))
+    (action . (("Jump to Bookmark" . bm-goto)
+               ("Delete Bookmark" . (lambda (bookmark)
+                                      (with-current-buffer (overlay-buffer bookmark)
+                                        (bm-bookmark-remove bookmark)))))))
+  "Visible Bookmarks type.")
+
 ;;; Visible Bookmarks
 ;; (install-elisp "http://cvs.savannah.gnu.org/viewvc/*checkout*/bm/bm/bm.el")
-
 
 ;; http://d.hatena.ne.jp/grandVin/20080911/1221114327
 (defvar anything-c-source-bm
   '((name . "Visible Bookmarks")
     (init . anything-c-bm-init)
     (candidates-in-buffer)
-    (type . line))
+    (type . bm))
   "Needs bm.el.
 
 http://www.nongnu.org/bm/")
