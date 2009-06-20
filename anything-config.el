@@ -1958,6 +1958,12 @@ http://www.nongnu.org/bm/")
                                  (buffer-substring start (1- end)))))
                 (with-current-buffer buf (insert str))))))))))
 
+;;; Visible Bookmarks add
+(defvar anything-c-source-bm-add
+  '((name . "Add Visible Bookmark")
+    (dummy)
+    (action . bm-bookmark-add)))
+
 ;;; Special bookmarks
 (defvar anything-c-source-bookmarks-ssh
   '((name . "Bookmarks-ssh")
