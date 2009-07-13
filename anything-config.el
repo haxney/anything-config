@@ -1918,7 +1918,7 @@ word in the function's name, e.g. \"bb\" is an abbrev for
 (define-anything-type-attribute 'bm
   '((display-to-real . (lambda (candidate)
                          (save-excursion
-                           (unless (string-match "^ *\\([0-9]+\\): \\[\\(.+\\)\\]: <\\(.+\\)>.*$" candidate)
+                           (unless (string-match "^ *\\([0-9]+\\): \\(?:\\[\\(.+\\)\\]: \\)?<\\(.+\\)>.*$" candidate)
                              (error "Bookmark specification not found."))
                            (let ((line (string-to-number (match-string 1 candidate)))
                                  (annotation (match-string 2 candidate))
@@ -1965,11 +1965,16 @@ http://www.nongnu.org/bm/")
                 (end (overlay-end bm))
                 (annotation (or (overlay-get bm 'annotation) "")))
             (unless (< (- end start) 1) ; org => (if (< (- end start) 2)
-              (setq str (format "%7d: [%-20.20s]: <%s> %s\n"
+              (setq str (if (string= "" annotation)
+                            (format "%7d: <%s> %s\n"
+                                (line-number-at-pos start)
+                                (buffer-name)
+                                (buffer-substring start (1- end)))
+                          (format "%7d: [%-20.20s]: <%s> %s\n"
                                 (line-number-at-pos start)
                                 annotation
                                 (buffer-name)
-                                (buffer-substring start (1- end)))))))
+                                (buffer-substring start (1- end))))))))
         (with-current-buffer buf (insert str))))))
 
 ;;; Visible Bookmarks add
