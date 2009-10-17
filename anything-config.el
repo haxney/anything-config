@@ -2698,7 +2698,8 @@ http://ctags.sourceforge.net/")
 
 (defun anything-semantic-default-action (candidate)
   (let ((tag (cdr (assoc candidate anything-semantic-candidates))))
-    (push-mark)
+    (with-current-buffer anything-current-buffer
+      (push-mark))
     (semantic-go-to-tag tag)))
 
 (defvar anything-c-source-semantic
