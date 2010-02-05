@@ -12,7 +12,7 @@
 ;; Copyright (C) 2009, rubikitch, all rights reserved.
 ;; Copyright (C) 2009, Thierry Volpiatto, all rights reserved.
 ;; Created: 2009-02-16 21:38:23
-;; Version: 0.4.1
+;; Version: 2010.02.04
 ;; URL: http://www.emacswiki.org/emacs/download/anything-config.el
 ;; Keywords: anything, anything-config
 ;; Compatibility: GNU Emacs 22 ~ 23
@@ -51,7 +51,7 @@
 ;; Predefined configurations for `anything.el'
 ;;
 ;; For quick start, try `anything-for-files' to open files.
-;; 
+;;
 ;; To configure anything you should setup `anything-sources'
 ;; with specify source, like below:
 ;;
@@ -1068,7 +1068,7 @@ It is cleared after executing action.")
                          (cons 'source
                                (cons (match-string-no-properties 3)
                                      (assoc-default 'name (symbol-value (intern (match-string-no-properties 3)))))))))))
-                         
+
 ;; (find-epp (anything-c-create-summary))
 
 (defun anything-c-insert-summary ()
@@ -1303,7 +1303,7 @@ If prefix numeric arg is given go ARG level down."
          (loop
             with v = (tramp-dissect-file-name fname)
             for i across v collect i)))
-  
+
 (defun anything-find-files-get-candidates ()
   "Create candidate list for `anything-c-source-find-files'."
   (let ((path (cond ((string-match "^~" anything-pattern)
@@ -2063,7 +2063,7 @@ Work both with standard Emacs bookmarks and bookmark-extensions.el."
      for isw3m         = (and (fboundp 'bmkext-w3m-bookmark-p)
                               (bmkext-w3m-bookmark-p i))
      for isgnus        = (and (fboundp 'bmkext-gnus-bookmark-p)
-                              (bmkext-gnus-bookmark-p i)) 
+                              (bmkext-gnus-bookmark-p i))
      for isman         = (and (fboundp 'bmkext-man-bookmark-p) ; Man
                               (bmkext-man-bookmark-p i))
      for iswoman       = (and (fboundp 'bmkext-woman-bookmark-p) ; Woman
@@ -2083,7 +2083,7 @@ Work both with standard Emacs bookmarks and bookmark-extensions.el."
      if isgnus
      collect (propertize i 'face 'anything-bmkext-gnus 'help-echo pred)
      ;; Man Woman
-     if (or iswoman isman) 
+     if (or iswoman isman)
      collect (propertize i 'face 'anything-bmkext-man 'help-echo pred)
      ;; directories
      if (and pred (file-directory-p pred))
@@ -2099,7 +2099,7 @@ Work both with standard Emacs bookmarks and bookmark-extensions.el."
      if (and (fboundp 'bmkext-get-buffer-name) bufp (not handlerp)
              (if pred (not (file-exists-p pred)) (not pred)))
      collect (propertize i 'face 'anything-bmkext-no--file)))
-       
+
 ;;; Faces for bookmarks
 (defface anything-bmkext-info
   '((t (:foreground "green")))
@@ -2396,10 +2396,10 @@ See: <http://mercurial.intuxication.org/hg/emacs-bookmark-extension>."
     (candidate-transformer anything-c-highlight-firefox-bookmarks)
     (action . (("Browse Url" . (lambda (candidate)
                                  (w3m-browse-url
-                                  (anything-c-firefox-bookmarks-get-value candidate)))) 
+                                  (anything-c-firefox-bookmarks-get-value candidate))))
                ("Browse Url Firefox" . (lambda (candidate)
                                          (browse-url-firefox
-                                          (anything-c-firefox-bookmarks-get-value candidate)))) 
+                                          (anything-c-firefox-bookmarks-get-value candidate))))
                ("Copy Url" . (lambda (elm)
                                (kill-new (anything-c-w3m-bookmarks-get-value elm))))))))
 
@@ -2970,12 +2970,12 @@ If this action is executed just after `yank', replace with STR as yanked string.
          with marks = (cons (mark-marker) mark-ring)
          with recip = nil
          for i in marks
-         for f = (get-marks i) 
+         for f = (get-marks i)
          if (not (member f recip))
          do
            (push f recip)
          finally (return (reverse recip))))))
-           
+
 (defvar anything-mark-ring-cache nil)
 (defvar anything-c-source-mark-ring
   '((name . "mark-ring")
@@ -3011,7 +3011,7 @@ If this action is executed just after `yank', replace with STR as yanked string.
                              (switch-to-buffer (second items))
                              (anything-goto-line (string-to-number (car items)))
                              (anything-match-line-color-current-line))))))
-                             
+
 (defun anything-c-source-global-mark-ring-candidates ()
   (flet ((buf-fn (m)
            (with-current-buffer (marker-buffer m)
@@ -3024,7 +3024,7 @@ If this action is executed just after `yank', replace with STR as yanked string.
                (format "%7d:%s:    %s" (line-number-at-pos) (marker-buffer m) line)))))
     (loop
        with marks = global-mark-ring
-       with recip = nil  
+       with recip = nil
        for i in marks
        if (not (or (string-match "^ " (format "%s" (marker-buffer i)))
                    (null (marker-buffer i))))
@@ -3269,7 +3269,7 @@ See http://orgmode.org for the latest version.")
                                          (setq anything-c-yaoddmuse-ew-cache
                                                (gethash "EmacsWiki" yaoddmuse-pages-hash)))
                                        (yaoddmuse-update-pagename))))))
-    (action-transformer anything-c-yaoddmuse-action-transformer))) 
+    (action-transformer anything-c-yaoddmuse-action-transformer)))
 
 ;; (anything 'anything-c-source-yaoddmuse-emacswiki-edit-or-view)
 
@@ -3462,7 +3462,7 @@ Return an alist with elements like (data . number_results)."
                 for i in result-alist
                 for data = (cdr (caadr (assoc 'suggestion i)))
                 for nqueries = (cdr (caadr (assoc 'num_queries i)))
-                for ldata = (length data) 
+                for ldata = (length data)
                 do
                   (when (> ldata anything-gg-sug-lgh-flag)
                     (setq anything-gg-sug-lgh-flag ldata))
@@ -3494,8 +3494,8 @@ Return an alist with elements like (data . number_results)."
          suggestions
          (list (cons (concat "Search for " "'" anything-input "'" " on Google")
                      anything-input))))))
-         
-    
+
+
 (defun anything-c-google-suggest-action (candidate)
   "Default action to jump to a google suggested candidate."
   (browse-url (concat anything-c-google-suggest-search-url
@@ -3538,7 +3538,7 @@ Return an alist with elements like (data . number_results)."
          suggestions
          (list (cons (concat "Search for " "'" anything-input "'" " on Yahoo")
                      anything-input))))))
-         
+
 (defun anything-c-yahoo-suggest-action (candidate)
   "Default action to jump to a Yahoo suggested candidate."
   (browse-url (concat anything-c-yahoo-suggest-search-url
@@ -3561,7 +3561,7 @@ Return an alist with elements like (data . number_results)."
 (defvar anything-c-surfraw-favorites '("google" "wikipedia"
                                        "yahoo" "translate"
                                        "codesearch" "genpkg"
-                                       "genportage" "fast" 
+                                       "genportage" "fast"
                                        "currency")
   "All elements of this list will appear first in results.")
 (defvar anything-c-surfraw-use-only-favorites nil
@@ -3615,7 +3615,7 @@ A list of search engines."
                 (setq anything-c-surfraw-elvi (anything-c-surfraw-sort-elvi
                                                anything-c-surfraw-use-only-favorites))
                 (setq anything-c-surfraw-cache
-                      (loop for i in anything-c-surfraw-elvi 
+                      (loop for i in anything-c-surfraw-elvi
                          if (car i)
                          collect (car i))))))
     (candidates . (lambda ()
@@ -3971,7 +3971,7 @@ See also `anything-create--actions'."
     (init . (lambda ()
               (unless anything-c-xfonts-cache
                 (setq anything-c-xfonts-cache
-                      (x-list-fonts "*")))))  
+                      (x-list-fonts "*")))))
     (candidates . anything-c-xfonts-cache)
     (action . (("Copy to kill ring" . (lambda (elm)
                                         (kill-new elm)))
@@ -3980,7 +3980,7 @@ See also `anything-create--actions'."
                                (set-default-font elm 'keep-size)
                                (message "New font have been copied to kill ring")))))
     (persistent-action . anything-c-persistent-xfont-action)))
-  
+
 ;; (anything 'anything-c-source-xfonts)
 
 ;; Source for Debian/Ubuntu users
@@ -4897,7 +4897,7 @@ With optional arg `merge' call `ediff-merge-buffers'."
       (1
        (setq buf1 anything-current-buffer
              buf2 (first (anything-marked-candidates))))
-      (2 
+      (2
        (setq buf1 (first (anything-marked-candidates))
              buf2 (second (anything-marked-candidates))))
       (t
