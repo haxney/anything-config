@@ -12,7 +12,7 @@
 ;; Copyright (C) 2009, rubikitch, all rights reserved.
 ;; Copyright (C) 2009, Thierry Volpiatto, all rights reserved.
 ;; Created: 2009-02-16 21:38:23
-;; Version: 2010.2.6
+;; Version: 2010.2.24
 ;; URL: http://www.emacswiki.org/emacs/download/anything-config.el
 ;; Keywords: anything, anything-config
 ;; Compatibility: GNU Emacs 22 ~ 23
@@ -1096,13 +1096,31 @@ It is cleared after executing action.")
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; Anything Sources ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;; <Buffer>
+(defun anything-get-visible-buffers (&optional minibuf all-frames)
+  (let ((bufs (make-symbol "buffers")))
+    (set bufs nil)
+    (walk-windows '(lambda (wind)
+                     (add-to-list bufs (window-buffer wind)))
+                  minibuf
+                  all-frames)
+    (symbol-value bufs)))
+
 (defun anything-c-buffer-list ()
   "Return the list of names of buffers with boring buffers filtered out.
-Boring buffers is specified by `anything-c-boring-buffer-regexp'.
-The first buffer in the list will be the last recently used
-buffer that is not the current buffer."
-  (let ((buffers (mapcar 'buffer-name (buffer-list))))
-    (append (cdr buffers) (list (car buffers)))))
+Boring buffer names are specified by
+`anything-c-boring-buffer-regexp'. The first buffer in the list
+will be the last recently used buffer that is not visible in the
+current frame."
+  (save-window-excursion
+    ;; `frameconfig' is a dynamically-bound variable from `anything'. It would
+    ;; be nice if there were a cleaner way of doing this.
+    (anything-set-frame/window-configuration frameconfig)
+    (let ((buffers (buffer-list))
+          (visible (anything-get-visible-buffers)))
+
+      (mapc '(lambda (buf) (setq buffers (delete buf buffers))) visible)
+      (mapcar 'buffer-name buffers)
+      )))
 
 (defvar anything-c-source-buffers
   '((name . "Buffers")
